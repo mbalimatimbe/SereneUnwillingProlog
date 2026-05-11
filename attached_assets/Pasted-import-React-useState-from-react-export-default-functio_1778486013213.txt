@@ -1,0 +1,511 @@
+import React, { useState } from 'react';
+
+export default function ProgrammingContentGenerator() {
+  const programmingTopics = [
+    'Introduction to Programming',
+    'Variables and Data Types',
+    'Operators and Expressions',
+    'Conditional Statements',
+    'Loops',
+    'Functions and Methods',
+    'Arrays and Lists',
+    'Object-Oriented Programming',
+    'Classes and Objects',
+    'File Handling',
+    'Exception Handling',
+    'Algorithms',
+    'Data Structures',
+    'Debugging Techniques',
+    'Database Fundamentals',
+    'Web Development Basics',
+  ];
+
+  const prompts = {
+    Blog:
+      'Generate a beginner-friendly blog post explaining [TOPIC] for first-year programming students. Include examples, key concepts, and a short quiz.',
+    Lesson:
+      'Create a lesson plan for first-year programming students about [TOPIC]. Include objectives, explanations, examples, activities, and homework.',
+    Quiz:
+      'Generate a multiple-choice quiz with answers about [TOPIC] suitable for first-year programming students.',
+    Code:
+      'Generate beginner-friendly code examples for [TOPIC] using [LANGUAGE]. Explain each line of code.',
+    Assignment:
+      'Create a practical programming assignment for first-year students on [TOPIC]. Include instructions, requirements, and marking criteria.',
+    Email:
+      'Write a professional email to first-year programming students about [TOPIC]. Keep it clear and supportive.',
+  };
+
+  const [contentType, setContentType] = useState('Lesson');
+  const [topic, setTopic] = useState('Variables and Data Types');
+  const [language, setLanguage] = useState('Python');
+  const [difficulty, setDifficulty] = useState('Beginner');
+  const [generatedContent, setGeneratedContent] = useState(null);
+  const [customPrompt, setCustomPrompt] = useState('');
+
+  const sanitizeText = (text) => {
+    return text.trim().length > 0
+      ? text.trim()
+      : 'Introduction to Programming';
+  };
+
+  const buildExampleCode = () => {
+    if (language === 'Python') {
+      return `name = 'Alice'
+age = 19
+print(name)
+print(age)`;
+    }
+
+    if (language === 'Java') {
+      return `public class Main {
+  public static void main(String[] args) {
+    String name = "Alice";
+    int age = 19;
+
+    System.out.println(name);
+    System.out.println(age);
+  }
+}`;
+    }
+
+    return `let name = 'Alice';
+let age = 19;
+
+console.log(name);
+console.log(age);`;
+  };
+
+  const generateContent = () => {
+    const cleanTopic = sanitizeText(topic);
+
+    const basePrompt = customPrompt || prompts[contentType];
+
+    const finalPrompt = basePrompt
+      .replaceAll('[TOPIC]', cleanTopic)
+      .replaceAll('[LANGUAGE]', language);
+
+    const generated = {
+      title: `${contentType} Content`,
+      topic: cleanTopic,
+      difficulty,
+      language,
+      prompt: finalPrompt,
+      sections: [],
+    };
+
+    switch (contentType) {
+      case 'Lesson':
+        generated.sections = [
+          {
+            heading: 'Learning Objectives',
+            content: [
+              `Understand ${cleanTopic}`,
+              `Apply ${cleanTopic} in practical exercises`,
+              `Build confidence using ${language}`,
+            ],
+          },
+          {
+            heading: 'Explanation',
+            content: `${cleanTopic} is a foundational programming concept that helps students build logical thinking and coding skills.`,
+          },
+          {
+            heading: 'Code Example',
+            content: buildExampleCode(),
+            isCode: true,
+          },
+          {
+            heading: 'Activity',
+            content: `Create a practical activity where students apply ${cleanTopic} using ${language}.`,
+          },
+        ];
+        break;
+
+      case 'Quiz':
+        generated.sections = [
+          {
+            heading: 'Quiz Questions',
+            content: [
+              `What is ${cleanTopic}?`,
+              `Why is ${cleanTopic} important in programming?`,
+              `Which language is used for this module? ${language}`,
+            ],
+          },
+        ];
+        break;
+
+      case 'Code':
+        generated.sections = [
+          {
+            heading: `Code Example in ${language}`,
+            content: buildExampleCode(),
+            isCode: true,
+          },
+          {
+            heading: 'Explanation',
+            content: `This code demonstrates ${cleanTopic} using ${language}.`,
+          },
+        ];
+        break;
+
+      case 'Assignment':
+        generated.sections = [
+          {
+            heading: 'Assignment Instructions',
+            content: `Develop an application demonstrating ${cleanTopic}.`,
+          },
+          {
+            heading: 'Requirements',
+            content: [
+              `Use ${language}`,
+              'Include comments',
+              'Test your program',
+              'Submit screenshots',
+            ],
+          },
+        ];
+        break;
+
+      case 'Blog':
+        generated.sections = [
+          {
+            heading: 'Introduction',
+            content: `${cleanTopic} is an important concept for beginner programmers.`,
+          },
+          {
+            heading: 'Key Concepts',
+            content: `Understanding ${cleanTopic} improves coding and problem-solving skills.`,
+          },
+          {
+            heading: 'Code Example',
+            content: buildExampleCode(),
+            isCode: true,
+          },
+        ];
+        break;
+
+      case 'Email':
+        generated.sections = [
+          {
+            heading: 'Subject',
+            content: 'Programming Module Update',
+          },
+          {
+            heading: 'Message',
+            content: `Please review ${cleanTopic} before the next class.`,
+          },
+        ];
+        break;
+
+      default:
+        generated.sections = [];
+    }
+
+    setGeneratedContent(generated);
+  };
+
+  const handlePromptSelection = (title, prompt) => {
+    setContentType(title);
+    setCustomPrompt(prompt);
+  };
+
+  const renderSectionContent = (section) => {
+    if (Array.isArray(section.content)) {
+      return (
+        <ul className="list-disc pl-6 space-y-2 text-slate-700">
+          {section.content.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+      );
+    }
+
+    if (section.isCode) {
+      return (
+        <pre className="bg-slate-900 text-green-400 rounded-2xl p-5 overflow-auto text-sm leading-relaxed">
+          <code>{section.content}</code>
+        </pre>
+      );
+    }
+
+    return <p className="text-slate-700 leading-relaxed">{section.content}</p>;
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 p-6">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="bg-indigo-600 p-3 rounded-2xl text-white shadow-lg text-2xl">
+              💻
+            </div>
+
+            <div>
+              <h1 className="text-3xl font-extrabold text-slate-800">
+                Programming Content Generator
+              </h1>
+
+              <p className="text-slate-500 text-sm mt-1">
+                First-Year Programming Module Toolkit
+              </p>
+            </div>
+          </div>
+
+          <p className="text-slate-600 mb-8 leading-relaxed">
+            Generate structured educational content for programming students.
+          </p>
+
+          <div className="space-y-5">
+            <div>
+              <label className="block font-semibold text-slate-700 mb-2">
+                Content Type
+              </label>
+
+              <select
+                value={contentType}
+                onChange={(e) => setContentType(e.target.value)}
+                className="w-full border border-slate-200 rounded-2xl p-3 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                {Object.keys(prompts).map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block font-semibold text-slate-700 mb-2">
+                Programming Topic
+              </label>
+
+              <select
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                className="w-full border border-slate-200 rounded-2xl p-3 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                {programmingTopics.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block font-semibold text-slate-700 mb-2">
+                Programming Language
+              </label>
+
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="w-full border border-slate-200 rounded-2xl p-3 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="Python">Python</option>
+                <option value="Java">Java</option>
+                <option value="JavaScript">JavaScript</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block font-semibold text-slate-700 mb-2">
+                Difficulty
+              </label>
+
+              <select
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+                className="w-full border border-slate-200 rounded-2xl p-3 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block font-semibold text-slate-700 mb-2">
+                Custom Prompt
+              </label>
+
+              <textarea
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                className="w-full border border-slate-200 rounded-2xl p-4 h-32 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Write your own custom prompt"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={generateContent}
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl py-4 font-semibold shadow-xl hover:scale-[1.02] transition-all"
+            >
+              Generate Content
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 lg:col-span-2 border border-white/20">
+          <h2 className="text-2xl font-bold text-slate-800 mb-6">
+            Generated Output
+          </h2>
+
+          <div className="bg-gradient-to-br from-slate-50 to-indigo-50 border border-indigo-100 rounded-3xl p-6 min-h-[500px] overflow-auto">
+            {!generatedContent ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center text-slate-500">
+                <div className="text-6xl mb-4">📘</div>
+                <p className="text-lg font-medium">
+                  Your generated educational content will appear here.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="border-b border-indigo-100 pb-5">
+                  <h2 className="text-3xl font-bold text-slate-800 mb-4">
+                    {generatedContent.title}
+                  </h2>
+
+                  <div className="flex flex-wrap gap-3">
+                    <span className="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full text-sm font-semibold">
+                      {generatedContent.topic}
+                    </span>
+
+                    <span className="bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-semibold">
+                      {generatedContent.difficulty}
+                    </span>
+
+                    <span className="bg-sky-100 text-sky-700 px-4 py-2 rounded-full text-sm font-semibold">
+                      {generatedContent.language}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                  <p className="text-sm font-semibold text-slate-500 mb-2">
+                    Generated Prompt
+                  </p>
+
+                  <p className="text-slate-700 leading-relaxed">
+                    {generatedContent.prompt}
+                  </p>
+                </div>
+
+                {generatedContent.sections.map((section, index) => (
+                  <div
+                    key={index}
+                    className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6"
+                  >
+                    <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <span className="bg-indigo-100 text-indigo-700 p-2 rounded-xl text-sm">
+                        📄
+                      </span>
+                      {section.heading}
+                    </h3>
+
+                    {renderSectionContent(section)}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto mt-8 bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="bg-purple-600 p-3 rounded-2xl text-white text-xl">
+            📚
+          </div>
+
+          <h2 className="text-2xl font-bold text-slate-800">
+            Prompt Library
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Object.entries(prompts).map(([title, prompt]) => (
+            <div
+              key={title}
+              className="border border-slate-100 rounded-3xl p-5 bg-gradient-to-br from-white to-indigo-50 hover:shadow-xl transition-all duration-300"
+            >
+              <h3 className="font-bold text-lg text-slate-800 mb-3">
+                {title}
+              </h3>
+
+              <p className="text-sm text-slate-600 mb-5 leading-relaxed">
+                {prompt}
+              </p>
+
+              <button
+                type="button"
+                onClick={() => handlePromptSelection(title, prompt)}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-md hover:scale-105 transition-all"
+              >
+                Use Prompt
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto mt-8 bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20">
+        <h2 className="text-2xl font-bold text-slate-800 mb-6">
+          Functional Test Cases
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm text-slate-700">
+          <div className="border border-slate-100 rounded-2xl p-5 bg-slate-50">
+            <strong>Test Case 1</strong>
+            <p className="mt-2">
+              Select Lesson, choose Python, and generate content.
+            </p>
+            <p className="mt-2 text-slate-500">
+              Expected Result: Lesson content with Python code appears.
+            </p>
+          </div>
+
+          <div className="border border-slate-100 rounded-2xl p-5 bg-slate-50">
+            <strong>Test Case 2</strong>
+            <p className="mt-2">
+              Switch to Quiz and generate content.
+            </p>
+            <p className="mt-2 text-slate-500">
+              Expected Result: Quiz questions appear in the output panel.
+            </p>
+          </div>
+
+          <div className="border border-slate-100 rounded-2xl p-5 bg-slate-50">
+            <strong>Test Case 3</strong>
+            <p className="mt-2">
+              Click Use Prompt in the Prompt Library.
+            </p>
+            <p className="mt-2 text-slate-500">
+              Expected Result: The content type and prompt update automatically.
+            </p>
+          </div>
+
+          <div className="border border-slate-100 rounded-2xl p-5 bg-slate-50">
+            <strong>Test Case 4</strong>
+            <p className="mt-2">
+              Generate Code content using JavaScript.
+            </p>
+            <p className="mt-2 text-slate-500">
+              Expected Result: JavaScript example code is displayed.
+            </p>
+          </div>
+
+          <div className="border border-slate-100 rounded-2xl p-5 bg-slate-50">
+            <strong>Test Case 5</strong>
+            <p className="mt-2">
+              Select Assignment and generate content.
+            </p>
+            <p className="mt-2 text-slate-500">
+              Expected Result: Assignment instructions and requirements appear.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
