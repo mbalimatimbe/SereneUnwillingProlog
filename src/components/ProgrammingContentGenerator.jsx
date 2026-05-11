@@ -41,6 +41,7 @@ export default function ProgrammingContentGenerator() {
   const [difficulty, setDifficulty] = useState('Beginner');
   const [generatedContent, setGeneratedContent] = useState(null);
   const [customPrompt, setCustomPrompt] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const sanitizeText = (text) => {
     return text.trim().length > 0
@@ -208,6 +209,35 @@ console.log(age);`;
     setCustomPrompt(prompt);
   };
 
+  const buildPlainText = () => {
+    if (!generatedContent) return '';
+    const lines = [];
+    lines.push(generatedContent.title.toUpperCase());
+    lines.push(`Topic: ${generatedContent.topic}`);
+    lines.push(`Difficulty: ${generatedContent.difficulty}`);
+    lines.push(`Language: ${generatedContent.language}`);
+    lines.push('');
+    lines.push('PROMPT');
+    lines.push(generatedContent.prompt);
+    generatedContent.sections.forEach((section) => {
+      lines.push('');
+      lines.push(section.heading.toUpperCase());
+      if (Array.isArray(section.content)) {
+        section.content.forEach((item) => lines.push(`• ${item}`));
+      } else {
+        lines.push(section.content);
+      }
+    });
+    return lines.join('\n');
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(buildPlainText()).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   const renderSectionContent = (section) => {
     if (Array.isArray(section.content)) {
       return (
@@ -347,9 +377,24 @@ console.log(age);`;
         </div>
 
         <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 lg:col-span-2 border border-white/20">
-          <h2 className="text-2xl font-bold text-slate-800 mb-6">
-            Generated Output
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-slate-800">
+              Generated Output
+            </h2>
+            {generatedContent && (
+              <button
+                type="button"
+                onClick={handleCopy}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold shadow transition-all ${
+                  copied
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
+                }`}
+              >
+                {copied ? '✅ Copied!' : '📋 Copy'}
+              </button>
+            )}
+          </div>
 
           <div className="bg-gradient-to-br from-slate-50 to-indigo-50 border border-indigo-100 rounded-3xl p-6 min-h-[500px] overflow-auto">
             {!generatedContent ? (
